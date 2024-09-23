@@ -11,8 +11,22 @@ public class Player : MonoBehaviour
     public bool block = false, death = false, goingRight = false, goingLeft = false, idle = true, roll = false, onGround = false;
     [HideInInspector]
     public float redStart = 0.25f, redWait = 0.4f, whiteTurn = 0.1f;
-    public KeyCode leftButton, rightButton, jumpButton, blockButton, rollButton, meleeButton, specialAttackButton;
+    public KeyCode leftButton, rightButton, jumpButton, blockButton, rollButton, meleeButton, specialAttackButton;//oyun ici kullandigim tuslar
     public GameObject fireBall;
+    public PlayerType playerType;
+    public StandingSide standingSide;
+
+    public enum StandingSide
+    {
+        Left,
+        Right
+    }
+
+    public enum PlayerType
+    {
+        PlayerOne,
+        PlayerTwo
+    }
 
     private void Awake()
     {
@@ -32,50 +46,62 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(rightButton) && !block && !death && !roll)//Go Right
+        if (!death)
         {
-            GoingRight();
-        }
-        if (Input.GetKey(leftButton) && !block && !death && !roll)//Go Left
-        {
-            GoingLeft();
-        }
-        if (Input.GetKeyDown(meleeButton))//Melee Attack
-        {
-            MeleeAttack();
-        }
-        if (Input.GetKeyDown(rollButton) && !roll)//Rolling
-        {
-            Rolling();
-        }
-        if (Input.GetKeyDown(jumpButton) && !death && !block && onGround)//Jump
-        {
-            Jumping();
-        }
-        if (Input.GetKey(blockButton) && !death)//Block
-        {
-            Blocking();
-        }
-        if (Input.GetKeyDown(specialAttackButton))//Melee Attack
-        {
-            MeleeAttack();
-            FireBall();
-        }
-        else
-        {
-            block = false;
-        }
-        if (!Input.anyKey)//Idle
-        {
-            Idle();
-        }
+            if (Input.GetKey(rightButton) || Input.GetKey(leftButton) || Input.GetKeyDown(meleeButton) || Input.GetKeyDown(rollButton) ||
+            Input.GetKeyDown(jumpButton) || Input.GetKey(blockButton) || Input.GetKey(specialAttackButton))
+            {
+                if (Input.GetKey(rightButton) && !block && !death && !roll)//Go Right
+                {
+                    GoingRight();
+                }
+                if (Input.GetKey(leftButton) && !block && !death && !roll)//Go Left
+                {
+                    GoingLeft();
+                }
+                if (Input.GetKeyDown(meleeButton))//Melee Attack
+                {
+                    MeleeAttack();
+                }
+                if (Input.GetKeyDown(rollButton) && !roll)//Rolling
+                {
+                    Rolling();
+                }
+                if (Input.GetKeyDown(jumpButton) && !death && !block && onGround)//Jump
+                {
+                    Jumping();
+                }
+                if (Input.GetKey(blockButton) && !death)//Block
+                {
+                    Blocking();
+                }
+                if (Input.GetKeyDown(specialAttackButton))//Melee Attack
+                {
+                    MeleeAttack();
+                    FireBall();
+                }
+                else
+                {
+                    block = false;
+                }
+            }
+            else
+            {
+                PlayAnimation("Idle");
+            }
+        }        
     }
 
-    void FireBall()
+    void FireBall()//fireball spawn etme
     {
         GameObject newFireBall = Instantiate(fireBall, transform.position + new Vector3(0.5f,2,0), Quaternion.identity);
+        newFireBall.GetComponent<FireBall>().fbPlayerType = playerType;
         newFireBall.SetActive(true);
         newFireBall.transform.parent = null;
+        if (standingSide == StandingSide.Left)
+            newFireBall.GetComponent<FireBall>().fireBallDirection = Vector2.right;
+        else
+            newFireBall.GetComponent<FireBall>().fireBallDirection = Vector2.left;
     }
 
     void GoingRight()
