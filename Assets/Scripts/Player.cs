@@ -1,20 +1,24 @@
 using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
     public float speed = 1.0f, jumpForce = 1.0f, health = 100;
     Animator animCont;
     string[] animNames = new string[] { "Run", "Idle", "Block", "Death" };
-    public bool block = false, death = false, goingRight = false, goingLeft = false, idle = true, roll = false, onGround = false;
+    public bool block = false, death = false, goingRight = false, goingLeft = false, idle = true, roll = false, onGround = false, meleeRange = false;
     [HideInInspector]
     public float redStart = 0.25f, redWait = 0.4f, whiteTurn = 0.1f;
     public KeyCode leftButton, rightButton, jumpButton, blockButton, rollButton, meleeButton, specialAttackButton;//oyun ici kullandigim tuslar
     public GameObject fireBall;
     public PlayerType playerType;
     public StandingSide standingSide;
+    public TextMeshPro healthText;
+    public Image miniHealthBar, bigHealthBar;
 
     public enum StandingSide
     {
@@ -46,50 +50,54 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        healthText.text = health.ToString();
+        miniHealthBar.fillAmount = health / 100;
+        bigHealthBar.fillAmount = health / 100;
+        if (standingSide == StandingSide.Left)
+            healthText.transform.localScale = new Vector3(1, 1, 1);
+        else
+            healthText.transform.localScale = new Vector3(-1, 1, 1);
+
         if (!death)
-        {
-            if (Input.GetKey(rightButton) || Input.GetKey(leftButton) || Input.GetKeyDown(meleeButton) || Input.GetKeyDown(rollButton) ||
-            Input.GetKeyDown(jumpButton) || Input.GetKey(blockButton) || Input.GetKey(specialAttackButton))
+        {    
+            if (Input.GetKey(rightButton) && !block && !death && !roll)//Go Right
             {
-                if (Input.GetKey(rightButton) && !block && !death && !roll)//Go Right
-                {
-                    GoingRight();
-                }
-                if (Input.GetKey(leftButton) && !block && !death && !roll)//Go Left
-                {
-                    GoingLeft();
-                }
-                if (Input.GetKeyDown(meleeButton))//Melee Attack
-                {
-                    MeleeAttack();
-                }
-                if (Input.GetKeyDown(rollButton) && !roll)//Rolling
-                {
-                    Rolling();
-                }
-                if (Input.GetKeyDown(jumpButton) && !death && !block && onGround)//Jump
-                {
-                    Jumping();
-                }
-                if (Input.GetKey(blockButton) && !death)//Block
-                {
-                    Blocking();
-                }
-                if (Input.GetKeyDown(specialAttackButton))//Melee Attack
-                {
-                    MeleeAttack();
-                    FireBall();
-                }
-                else
-                {
-                    block = false;
-                }
+                GoingRight();
+            }
+            if (Input.GetKey(leftButton) && !block && !death && !roll)//Go Left
+            {
+                GoingLeft();
+            }
+            if (Input.GetKeyDown(meleeButton))//Melee Attack
+            {
+                MeleeAttack();
+            }
+            if (Input.GetKeyDown(rollButton) && !roll)//Rolling
+            {
+                Rolling();
+            }
+            if (Input.GetKeyDown(jumpButton) && !death && !block && onGround)//Jump
+            {
+                Jumping();
+            }
+            if (Input.GetKey(blockButton) && !death)//Block
+            {
+                Blocking();
             }
             else
             {
+                block = false;
+            }
+            if (Input.GetKeyDown(specialAttackButton))//Melee Attack
+            {
+                MeleeAttack();
+                FireBall();
+            }           
+            if (!Input.anyKey)
+            {
                 PlayAnimation("Idle");
             }
-        }        
+        }                      
     }
 
     void FireBall()//fireball spawn etme
@@ -121,6 +129,10 @@ public class Player : MonoBehaviour
     void MeleeAttack()
     {
         animCont.SetTrigger("Melee");
+        if (meleeRange)
+        {
+            //karsi karakterin canini azalt
+        }
     }
 
     void Rolling()
@@ -144,6 +156,14 @@ public class Player : MonoBehaviour
     {
         death = true;
         PlayAnimation("Death");
+        GetComponent<BoxCollider2D>().enabled = false;
+        GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+        Invoke(nameof(CloseText), 0.5f);
+    }
+
+    void CloseText()
+    {
+        healthText.gameObject.SetActive(false);
     }
 
     public void GetHurt()
@@ -181,5 +201,21 @@ public class Player : MonoBehaviour
     {
         block = true;
         PlayAnimation("Block");
-    }        
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if(collision.CompareTag("Player") && collision.GetComponent<Player>().playerType != playerType)
+        {
+            meleeRange = true;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player") && collision.GetComponent<Player>().playerType != playerType)
+        {
+            meleeRange = false;
+        }
+    }
 }
