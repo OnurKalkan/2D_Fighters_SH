@@ -19,6 +19,9 @@ public class Player : MonoBehaviour
     public StandingSide standingSide;
     public TextMeshPro healthText;
     public Image miniHealthBar, bigHealthBar;
+    GameManager gameManager;
+    public GameObject enemy;
+    public AudioSource swordSound, fireBallSound, blockSound, dieSound, fireBallHitSound;
 
     public enum StandingSide
     {
@@ -35,9 +38,10 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         animCont = GetComponent<Animator>();
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
-    void PlayAnimation(string animName)
+    public void PlayAnimation(string animName)
     {
         for (int i = 0; i < animNames.Length; i++)
         {
@@ -50,58 +54,63 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        healthText.text = health.ToString();
-        miniHealthBar.fillAmount = health / 100;
-        bigHealthBar.fillAmount = health / 100;
-        if (standingSide == StandingSide.Left)
-            healthText.transform.localScale = new Vector3(1, 1, 1);
-        else
-            healthText.transform.localScale = new Vector3(-1, 1, 1);
-
-        if (!death)
-        {    
-            if (Input.GetKey(rightButton) && !block && !death && !roll)//Go Right
-            {
-                GoingRight();
-            }
-            if (Input.GetKey(leftButton) && !block && !death && !roll)//Go Left
-            {
-                GoingLeft();
-            }
-            if (Input.GetKeyDown(meleeButton))//Melee Attack
-            {
-                MeleeAttack();
-            }
-            if (Input.GetKeyDown(rollButton) && !roll)//Rolling
-            {
-                Rolling();
-            }
-            if (Input.GetKeyDown(jumpButton) && !death && !block && onGround)//Jump
-            {
-                Jumping();
-            }
-            if (Input.GetKey(blockButton) && !death)//Block
-            {
-                Blocking();
-            }
+        if (gameManager.gameStart)
+        {            
+            healthText.text = health.ToString();
+            miniHealthBar.fillAmount = health / 100;
+            bigHealthBar.fillAmount = health / 100;
+            if (standingSide == StandingSide.Left)
+                healthText.transform.localScale = new Vector3(1, 1, 1);
             else
+                healthText.transform.localScale = new Vector3(-1, 1, 1);
+            if (!gameManager.gameEnd)
             {
-                block = false;
+                if (!death)
+                {
+                    if (Input.GetKey(rightButton) && !block && !death && !roll)//Go Right
+                    {
+                        GoingRight();
+                    }
+                    if (Input.GetKey(leftButton) && !block && !death && !roll)//Go Left
+                    {
+                        GoingLeft();
+                    }
+                    if (Input.GetKeyDown(meleeButton))//Melee Attack
+                    {
+                        MeleeAttack();
+                    }
+                    if (Input.GetKeyDown(rollButton) && !roll)//Rolling
+                    {
+                        Rolling();
+                    }
+                    if (Input.GetKeyDown(jumpButton) && !death && !block && onGround)//Jump
+                    {
+                        Jumping();
+                    }
+                    if (Input.GetKey(blockButton) && !death)//Block
+                    {
+                        Blocking();
+                    }
+                    else
+                    {
+                        block = false;
+                    }
+                    if (Input.GetKeyDown(specialAttackButton))//Range Attack
+                    {
+                        FireBall();
+                    }
+                    if (!Input.anyKey)
+                    {
+                        PlayAnimation("Idle");
+                    }
+                }
             }
-            if (Input.GetKeyDown(specialAttackButton))//Melee Attack
-            {
-                MeleeAttack();
-                FireBall();
-            }           
-            if (!Input.anyKey)
-            {
-                PlayAnimation("Idle");
-            }
-        }                      
+        }                                
     }
 
     void FireBall()//fireball spawn etme
     {
+        animCont.SetTrigger("Range");
         GameObject newFireBall = Instantiate(fireBall, transform.position + new Vector3(0.5f,2,0), Quaternion.identity);
         newFireBall.GetComponent<FireBall>().fbPlayerType = playerType;
         newFireBall.SetActive(true);
@@ -110,6 +119,7 @@ public class Player : MonoBehaviour
             newFireBall.GetComponent<FireBall>().fireBallDirection = Vector2.right;
         else
             newFireBall.GetComponent<FireBall>().fireBallDirection = Vector2.left;
+        fireBallSound.Play();
     }
 
     void GoingRight()
@@ -131,7 +141,22 @@ public class Player : MonoBehaviour
         animCont.SetTrigger("Melee");
         if (meleeRange)
         {
-            //karsi karakterin canini azalt
+            if (enemy.GetComponent<Player>().block)
+            {
+                enemy.GetComponent<Player>().health -= 3;
+                enemy.GetComponent<Animator>().SetTrigger("BlockHurt");
+                blockSound.Play();
+            }
+            else
+            {
+                enemy.GetComponent<Player>().health -= 25;
+                enemy.GetComponent<Player>().GetHurt();
+                swordSound.Play();
+            }
+        }
+        if (enemy.GetComponent<Player>().health <= 0)
+        {
+            enemy.gameObject.GetComponent<Player>().Dying();            
         }
     }
 
@@ -154,11 +179,13 @@ public class Player : MonoBehaviour
 
     public void Dying()
     {
+        dieSound.Play();
         death = true;
         PlayAnimation("Death");
         GetComponent<BoxCollider2D>().enabled = false;
         GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
         Invoke(nameof(CloseText), 0.5f);
+        gameManager.GameEnd();
     }
 
     void CloseText()

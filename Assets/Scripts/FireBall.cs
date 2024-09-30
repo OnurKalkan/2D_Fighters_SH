@@ -29,11 +29,13 @@ public class FireBall : MonoBehaviour
                     {
                         collision.GetComponent<Player>().health -= 20;
                         collision.GetComponent<Player>().GetHurt();
+                        collision.GetComponent<Player>().fireBallHitSound.Play();
                     }
                     else
                     {
                         collision.GetComponent<Player>().health -= 2;
                         collision.GetComponent<Animator>().SetTrigger("BlockHurt");
+                        collision.GetComponent<Player>().blockSound.Play();
                     }                        
                     if (collision.GetComponent<Player>().health <= 0)
                     {
