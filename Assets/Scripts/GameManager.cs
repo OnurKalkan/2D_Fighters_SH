@@ -11,10 +11,10 @@ public class GameManager : MonoBehaviour
     public int time = 90;
     public bool gameEnd, gameStart, skipCounting;
 
-    private void Start()
+    public void StartTheGame()
     {
         timerText.text = time.ToString();
-        if(!skipCounting)
+        if (!skipCounting)
             StartCoroutine(CountBackToFight());
         else
         {
@@ -28,6 +28,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator CountBackToFight()
     {
+        yield return new WaitForSeconds(0.5f);
         float countTime = 0.75f;
         counterText.text = "3";
         counterText.transform.DOScale(Vector3.one * 1.5f, countTime);

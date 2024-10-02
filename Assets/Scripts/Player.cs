@@ -32,7 +32,8 @@ public class Player : MonoBehaviour
     public enum PlayerType
     {
         PlayerOne,
-        PlayerTwo
+        PlayerTwo,
+        AI
     }
 
     private void Awake()
@@ -54,7 +55,7 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (gameManager.gameStart)
+        if (gameManager.gameStart && playerType != PlayerType.AI)
         {            
             healthText.text = health.ToString();
             miniHealthBar.fillAmount = health / 100;
