@@ -19,6 +19,7 @@ public class UIManager : MonoBehaviour
         inGameMenu.SetActive(true);
         mainMenu.SetActive(false);
         inGameObjects.SetActive(true);
+        mainMenu.GetComponent<AudioSource>().Stop();
     }
 
     public void ExitFromTheGame()

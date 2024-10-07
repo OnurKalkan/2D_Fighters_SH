@@ -10,6 +10,7 @@ public class CharacterSelect : MonoBehaviour
     public CharacterType myCharacterType;
     public int charIndex = 1;
     public bool isAI, playerOne, playerTwo;
+    GameManager gameManager;
 
     public enum CharacterType
     {
@@ -17,6 +18,11 @@ public class CharacterSelect : MonoBehaviour
         YellowKnight,
         BlueKnight,
         DarkKnight
+    }
+
+    private void Awake()
+    {
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
     }
 
     void Start()
@@ -43,24 +49,41 @@ public class CharacterSelect : MonoBehaviour
             charButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "HERO KNIGHT";
             myChar.GetComponent<Image>().color = Color.white;
             charName = "HeroKnight";
+            gameManager.playerOne = inGamePlayerParent.transform.Find("HeroKnight").gameObject;
+            if (playerOne)
+                gameManager.playerOne = inGamePlayerParent.transform.Find("HeroKnight").gameObject;
+            else
+                gameManager.playerTwo = inGamePlayerParent.transform.Find("HeroKnight").gameObject;
         }
         else if (myCharacterType == CharacterType.YellowKnight)
         {
             charButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "YELLOW KNIGHT";
             myChar.GetComponent<Image>().color = Color.yellow;
             charName = "HeroKnight Yellow";
+            if(playerOne)
+                gameManager.playerOne = inGamePlayerParent.transform.Find("HeroKnight Yellow").gameObject;
+            else
+                gameManager.playerTwo = inGamePlayerParent.transform.Find("HeroKnight Yellow").gameObject;
         }
         else if (myCharacterType == CharacterType.BlueKnight)
         {
             charButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "BLUE KNIGHT";
             myChar.GetComponent<Image>().color = Color.blue;
             charName = "HeroKnight Blue";
+            if (playerOne)
+                gameManager.playerOne = inGamePlayerParent.transform.Find("HeroKnight Blue").gameObject;
+            else
+                gameManager.playerTwo = inGamePlayerParent.transform.Find("HeroKnight Blue").gameObject;
         }
         else if (myCharacterType == CharacterType.DarkKnight)
         {
             charButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "DARK KNIGHT";
             myChar.GetComponent<Image>().color = Color.black;
             charName = "HeroKnight Dark";
+            if (playerOne)
+                gameManager.playerOne = inGamePlayerParent.transform.Find("HeroKnight Dark").gameObject;
+            else
+                gameManager.playerTwo = inGamePlayerParent.transform.Find("HeroKnight Dark").gameObject;
         }
         SelectInGameChar(charName);
     }
@@ -74,6 +97,10 @@ public class CharacterSelect : MonoBehaviour
             myChar.GetComponent<Image>().color = Color.white;
             charIndex = 1;
             charName = "HeroKnight";
+            if (playerOne)
+                gameManager.playerOne = inGamePlayerParent.transform.Find("HeroKnight").gameObject;
+            else
+                gameManager.playerTwo = inGamePlayerParent.transform.Find("HeroKnight").gameObject;
         }
         else if (myCharacterType == CharacterType.YellowKnight)
         {
@@ -81,6 +108,10 @@ public class CharacterSelect : MonoBehaviour
             myChar.GetComponent<Image>().color = Color.yellow;
             charIndex = 2;
             charName = "HeroKnight Yellow";
+            if (playerOne)
+                gameManager.playerOne = inGamePlayerParent.transform.Find("HeroKnight Yellow").gameObject;
+            else
+                gameManager.playerTwo = inGamePlayerParent.transform.Find("HeroKnight Yellow").gameObject;
         }
         else if (myCharacterType == CharacterType.BlueKnight)
         {
@@ -88,6 +119,10 @@ public class CharacterSelect : MonoBehaviour
             myChar.GetComponent<Image>().color = Color.blue;
             charIndex = 3;
             charName = "HeroKnight Blue";
+            if (playerOne)
+                gameManager.playerOne = inGamePlayerParent.transform.Find("HeroKnight Blue").gameObject;
+            else
+                gameManager.playerTwo = inGamePlayerParent.transform.Find("HeroKnight Blue").gameObject;
         }
         else if (myCharacterType == CharacterType.DarkKnight)
         {
@@ -95,6 +130,10 @@ public class CharacterSelect : MonoBehaviour
             myChar.GetComponent<Image>().color = Color.black;
             charIndex = 4;
             charName = "HeroKnight Dark";
+            if (playerOne)
+                gameManager.playerOne = inGamePlayerParent.transform.Find("HeroKnight Dark").gameObject;
+            else
+                gameManager.playerTwo = inGamePlayerParent.transform.Find("HeroKnight Dark").gameObject;
         }
         SelectInGameChar(charName);
     }

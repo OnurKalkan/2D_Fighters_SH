@@ -35,6 +35,7 @@ public class ArenaSelect : MonoBehaviour
         {
             arenaParent.transform.GetChild(i).GetComponent<Image>().enabled = false;
             arenaParent.transform.GetChild(i).GetChild(0).GetComponent<ArenaSelect>().isSelected = false;
+            arenaParent.transform.GetChild(i).GetChild(0).GetComponent<ArenaSelect>().arena.SetActive(false);
         }
     }
 }

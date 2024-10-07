@@ -1,4 +1,4 @@
-using DG.Tweening;
+﻿using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -22,6 +22,8 @@ public class Player : MonoBehaviour
     GameManager gameManager;
     public GameObject enemy;
     public AudioSource swordSound, fireBallSound, blockSound, dieSound, fireBallHitSound;
+    bool fbKey = false, jumpKey = false, attackKey = false;
+    int attackChoice = 0;
 
     public enum StandingSide
     {
@@ -106,7 +108,115 @@ public class Player : MonoBehaviour
                     }
                 }
             }
-        }                                
+        }   
+        else if(playerType == PlayerType.AI && gameManager.gameStart && !gameManager.gameEnd)
+        {
+            IsThereAnyFireBall();
+        }
+    }
+
+    void FBKeyOpen()
+    {
+        fbKey = false;
+    }
+
+    void JumpKey()
+    {
+        jumpKey = false;
+    }
+
+    void AttackKey()
+    {
+        attackKey = false;
+    }
+
+    void IsThereAnyFireBall()
+    {
+        GameObject[] fireballs = GameObject.FindGameObjectsWithTag("FireBall");
+        if(attackKey == false)
+        {
+            attackKey = true;
+            Invoke(nameof(AttackKey), 2);
+            attackChoice = Random.Range(0, 3);
+            print("aChoice:" + attackChoice);
+        }
+        int x = 0;
+        for (int i = 0; i < fireballs.Length; i++)
+        {
+            if (fireballs[i].GetComponent<FireBall>().fbPlayerType == PlayerType.PlayerOne)
+                x++;
+        }
+        if(attackChoice == 0 || attackChoice == 1)//bloklama
+        {
+            if (x == 1)
+            {
+                for (int i = 0; i < fireballs.Length; i++)
+                {
+                    if (Vector2.Distance(fireballs[i].transform.position, transform.position) < 3f &&
+                        fireballs[i].GetComponent<FireBall>().fbPlayerType == PlayerType.PlayerOne)
+                    {
+                        Blocking();
+                        if (!fbKey)
+                        {
+                            fbKey = true;
+                            Invoke(nameof(FireBall), 1);
+                            Invoke(nameof(FBKeyOpen), 1.1f);
+                        }
+                    }
+                }
+            }
+            else if (x > 1)
+            {
+                for (int i = 0; i < fireballs.Length; i++)
+                {
+                    if (Vector2.Distance(fireballs[i].transform.position, transform.position) < 3f)
+                    {
+                        Blocking();
+                    }
+                }
+            }
+            else if (x <= 0)
+            {
+                block = false;
+                Idle();
+            }
+        }
+        else if(attackChoice == 2)//zıplama
+        {
+            if (x == 1)
+            {
+                for (int i = 0; i < fireballs.Length; i++)
+                {
+                    if (Vector2.Distance(fireballs[i].transform.position, transform.position) < 5.5f &&
+                        fireballs[i].GetComponent<FireBall>().fbPlayerType == PlayerType.PlayerOne)
+                    {
+                        if (!jumpKey)
+                        {
+                            jumpKey = true;
+                            Invoke(nameof(JumpKey), 2);
+                            Jumping();
+                            transform.DOMoveX(transform.position.x - 2, 1).SetDelay(0.5f);
+                        }                        
+                    }
+                }
+            }
+            else if (x > 1)
+            {
+                for (int i = 0; i < fireballs.Length; i++)
+                {
+                    if (Vector2.Distance(fireballs[i].transform.position, transform.position) < 3f)
+                    {
+                        Blocking();
+                    }
+                }
+            }
+            else if (fireballs.Length <= 0)
+            {
+                block = false;
+                Idle();
+            }
+        }       
+        
     }
 
     void FireBall()//fireball spawn etme
@@ -140,7 +250,7 @@ public class Player : MonoBehaviour
     void MeleeAttack()
     {
         animCont.SetTrigger("Melee");
-        if (meleeRange)
+        if (meleeRange == true)
         {
             if (enemy.GetComponent<Player>().block)
             {
